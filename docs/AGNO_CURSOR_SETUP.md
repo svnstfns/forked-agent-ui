@@ -296,11 +296,25 @@ sessions/
 checkpoints/
 ```
 
-## Step 8: Create Cursor Rules
+## Step 8: Create Cursor Rules and Workspace Configuration
 
-Create `.cursorrules` file to guide Cursor's AI:
+### Understanding Cursor Rules
 
-```
+Cursor supports two types of rule files:
+1. **`.cursorrules`** (Legacy): Single file in project root
+2. **`.cursor/rules/*.mdc`** (Modern): Multiple files with metadata and scoping
+
+### Create Modern Cursor Rules
+
+Create `.cursor/rules/agno-framework.mdc`:
+
+```markdown
+---
+description: "Agno Framework development guidelines and patterns"
+globs: ["**/*.py", "agents/**/*", "teams/**/*", "workflows/**/*"]
+alwaysApply: true
+---
+
 # Agno Framework Development Rules
 
 ## Project Context
@@ -448,7 +462,232 @@ team = Team(
 - **Tools**: External capabilities
 ```
 
-## Step 9: Install Cursor Extensions
+### Create Additional Rule Files
+
+Create `.cursor/rules/testing.mdc`:
+
+```markdown
+---
+description: "Testing guidelines for Agno agents"
+globs: ["tests/**/*.py"]
+alwaysApply: false
+---
+
+# Testing Guidelines
+
+- Use pytest for all tests
+- Mock LLM responses to avoid API calls
+- Test session persistence and memory
+- Verify error handling
+- Aim for 90%+ test coverage
+- Use fixtures for agent creation
+```
+
+Create `.cursor/rules/tools.mdc`:
+
+```markdown
+---
+description: "Custom tool development guidelines"
+globs: ["tools/**/*.py"]
+alwaysApply: false
+---
+
+# Tool Development Rules
+
+- Add comprehensive docstrings with Args and Returns
+- Validate all inputs before processing
+- Return structured data (dicts or dataclasses)
+- Handle errors gracefully with try-except
+- Never expose secrets in tool code
+- Test tools independently of agents
+```
+
+### Legacy .cursorrules File (Optional)
+
+For backwards compatibility, you can also create `.cursorrules`:
+
+```
+# Agno Framework Development Rules
+
+This file provides legacy support. Modern rules are in .cursor/rules/*.mdc
+
+## Core Guidelines
+- Python 3.12+ with type hints
+- Agno framework patterns (Agent, Team, Workflow)
+- Use environment variables for secrets
+- Follow PEP 8 with 100 char lines
+
+See .cursor/rules/*.mdc for detailed guidelines.
+```
+
+## Step 9: Create Workspace File and Documentation Index
+
+### Create Multi-Root Workspace File
+
+Create `agno-project.code-workspace` for Cursor workspace configuration:
+
+```json
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "Agno Project"
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.analysis.extraPaths": [
+      "${workspaceFolder}",
+      "${workspaceFolder}/agents",
+      "${workspaceFolder}/teams",
+      "${workspaceFolder}/workflows"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    
+    "files.associations": {
+      "*.mdc": "markdown"
+    },
+    
+    "cursor.aiIndexing.enabled": true,
+    "cursor.aiIndexing.include": [
+      "**/*.py",
+      "**/*.md",
+      ".cursor/rules/**/*.mdc",
+      "docs/**/*"
+    ],
+    "cursor.aiIndexing.exclude": [
+      "**/__pycache__",
+      "**/.venv",
+      "**/node_modules",
+      "**/.git"
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-python.black-formatter",
+      "ms-python.isort",
+      "ms-python.debugpy",
+      "njpwerner.autodocstring"
+    ]
+  }
+}
+```
+
+**Key Workspace Features:**
+- **folders**: Define project roots (can add multiple for monorepos)
+- **settings**: Workspace-level IDE configuration
+- **extensions**: Recommended extensions for team consistency
+- **cursor.aiIndexing**: Configure what Cursor indexes for AI features
+
+### Create llms.txt for @Docs Integration
+
+Create `llms.txt` in project root:
+
+```markdown
+# Agno Framework Project
+
+## Overview
+AI agent development project using the Agno framework with memory, knowledge, and reasoning capabilities.
+
+## Technology Stack
+- Python 3.12+
+- Agno Framework 2.x
+- PostgreSQL (storage and vector DB)
+- OpenAI/Anthropic (LLM providers)
+
+## Terminology
+- **Agent**: Autonomous AI entity with tools, memory, and knowledge
+- **Team**: Coordinated group of agents (modes: route, coordinate, collaborate)
+- **Workflow**: Deterministic multi-step orchestration for production
+- **Memory**: Short-term (session) and long-term (persistent) storage
+- **Knowledge**: RAG-based document repository with vector search
+- **Session**: Persistent conversation context with unique ID
+- **Tool**: Executable function agents can invoke
+- **RunEvent**: Event types during agent execution (RunStarted, RunContent, etc.)
+
+## Project Structure
+- `/agents`: Individual agent implementations
+- `/teams`: Team configurations
+- `/workflows`: Workflow orchestrations
+- `/tools`: Custom tool implementations
+- `/knowledge/documents`: Knowledge base documents
+- `/tests`: Test suite
+- `.cursor/rules`: Cursor IDE rules (*.mdc files)
+
+## Coding Standards
+- Type hints required for all functions
+- Google-style docstrings
+- PEP 8 with 100 character line length
+- Black formatter + isort
+- Pytest for testing (90%+ coverage)
+
+## Environment Variables
+- OPENAI_API_KEY: OpenAI API key
+- ANTHROPIC_API_KEY: Anthropic API key
+- DATABASE_URL: PostgreSQL connection string
+- OS_SECURITY_KEY: AgentOS authentication token
+
+## Key Patterns
+
+### Agent Creation
+```python
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[WebSearch(), Reasoning()],
+    memory=AgentMemory(create_user_memories=True),
+    knowledge=AgentKnowledge(vector_db=PgVector2()),
+    storage=PostgresStorage()
+)
+```
+
+### Team Coordination
+```python
+team = Team(
+    agents=[researcher, writer],
+    mode="collaborate"
+)
+```
+
+### Workflow Orchestration
+```python
+class Pipeline(Workflow):
+    def run(self, session_id, message):
+        data = self.fetcher.run(message)
+        processed = self.processor.run(data)
+        return self.analyzer.run(processed)
+```
+
+## Documentation
+- Architecture: docs/AGNO_ARCHITECTURE.md
+- Features: docs/AGNO_FEATURES_AND_CONFIGURATION.md
+- Terms: docs/AGNO_RESERVED_TERMS.md
+- Setup: docs/AGNO_CURSOR_SETUP.md
+
+## Rules
+See `.cursor/rules/*.mdc` for detailed development guidelines.
+```
+
+**Using llms.txt in Cursor:**
+1. Open Cursor Chat (`Cmd/Ctrl + L`)
+2. Type `@Docs` and select your llms.txt
+3. Cursor will index this for context-aware AI assistance
+
+### Opening the Workspace
+
+To use the workspace file:
+
+```bash
+# From command line
+cursor agno-project.code-workspace
+
+# Or in Cursor:
+# File → Open Workspace from File → Select agno-project.code-workspace
+```
+
+## Step 10: Install Cursor Extensions
 
 1. Open Extensions panel: `Cmd/Ctrl + Shift + X`
 
@@ -462,7 +701,7 @@ team = Team(
    - **Better Comments** - Enhanced comment highlighting
    - **Error Lens** - Inline error display
 
-## Step 10: Create Project Files
+## Step 11: Create Project Files
 
 ### Create `requirements.txt`
 
@@ -598,7 +837,7 @@ async def test_researcher_run():
     assert len(response.content) > 0
 ```
 
-## Step 11: Configure Testing
+## Step 12: Configure Testing
 
 Create `pytest.ini`:
 
@@ -656,7 +895,125 @@ def mock_agent():
     )
 ```
 
-## Step 12: Use Cursor AI Features
+## Step 13: Use Cursor AI Features with Agno
+
+### 1. Cursor Chat with @Docs
+
+Cursor Chat provides AI assistance with full project context:
+
+**Using @Docs for Agno Context:**
+```
+# In Cursor Chat (Cmd/Ctrl + L)
+@Docs how do I create an agent with memory?
+@Docs explain RAG implementation in Agno
+@Docs what's the difference between Agent and Team?
+```
+
+Cursor will reference your `llms.txt` and `.cursor/rules/*.mdc` files for accurate, project-specific answers.
+
+**Index Your Documentation:**
+```
+# In Cursor Chat
+@Docs docs/AGNO_ARCHITECTURE.md
+@Docs docs/AGNO_FEATURES_AND_CONFIGURATION.md
+```
+
+### 2. Code Completion with Context
+
+Cursor's autocomplete understands Agno patterns from your rules:
+
+```python
+# Type "agent = " and Cursor suggests:
+agent = Agent(
+    name="",  # Cursor knows Agent structure
+    model=OpenAIChat(id="gpt-4o"),
+    tools=[],
+    memory=AgentMemory(),  # Suggests from your rules
+    knowledge=AgentKnowledge(),
+    storage=PostgresStorage()
+)
+```
+
+### 3. Inline Editing (Cmd/Ctrl + K)
+
+Select code and press `Cmd/Ctrl + K` for AI-powered edits:
+
+**Examples:**
+- Select agent code: "Add memory with user preferences"
+- Select tool function: "Add error handling and type hints"
+- Select test: "Mock the LLM responses"
+- Select docstring: "Convert to Google style"
+
+### 4. Cursor Composer (Cmd/Ctrl + I)
+
+Composer handles multi-file operations:
+
+**Examples:**
+```
+Create a research team with 3 specialized agents:
+- Researcher with WebSearch tool
+- Analyzer with Reasoning tool
+- Writer with memory enabled
+
+Add all files to agents/ and teams/ directories.
+```
+
+```
+Set up RAG knowledge base:
+- Configure PgVector2
+- Add PDF reader
+- Create knowledge loading script
+- Add to existing agent
+```
+
+### 5. Terminal Integration
+
+Cursor's AI-powered terminal understands your project:
+
+```bash
+# Type comment, get command:
+# install agno dependencies → pip install -r requirements.txt
+# run tests with coverage → pytest --cov
+# format all python files → black . && isort .
+```
+
+### 6. Rules-Aware Suggestions
+
+Your `.cursor/rules/*.mdc` files guide all AI features:
+
+**Example with agno-framework.mdc:**
+- Type `def create_agent` → Cursor suggests type hints
+- Create new tool → Cursor adds docstrings automatically
+- Import statement → Cursor uses `from agno.agent import Agent`
+
+**Example with testing.mdc:**
+- Create test file → Cursor adds pytest fixtures
+- Write test function → Cursor suggests mock patterns
+
+### 7. Workspace-Aware Features
+
+With `agno-project.code-workspace`:
+- AI indexes all folders in workspace
+- Understands cross-folder dependencies
+- Suggests imports from agents/, teams/, workflows/
+- Maintains context across multiple files
+
+### 8. Best Practices for Cursor with Agno
+
+**Do:**
+- ✅ Keep llms.txt updated with terminology
+- ✅ Use @Docs frequently in Chat
+- ✅ Maintain specific .mdc rules per directory
+- ✅ Open workspace file (not just folder)
+- ✅ Let Cursor index your docs/ directory
+
+**Don't:**
+- ❌ Mix .cursorrules and .cursor/rules (choose one)
+- ❌ Put secrets in rules files
+- ❌ Override Cursor suggestions without understanding
+- ❌ Forget to update llms.txt when patterns change
+
+## Step 14: Running and Testing
 
 ### 1. Code Completion
 
@@ -764,7 +1121,7 @@ mypy agents/ teams/ workflows/
 flake8 agents/ teams/ workflows/
 ```
 
-## Step 14: Debugging in Cursor
+## Step 15: Debugging in Cursor
 
 ### Configure Launch Configuration
 

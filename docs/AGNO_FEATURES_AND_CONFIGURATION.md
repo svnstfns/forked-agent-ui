@@ -692,8 +692,17 @@ repos:
 
 ### 4. Cursor AI Features Configuration
 
-#### Create `.cursorrules` file
-```
+#### Create Cursor Rules
+
+**Modern Approach (Recommended):** Create `.cursor/rules/agno-framework.mdc`:
+
+```markdown
+---
+description: "Agno Framework development guidelines"
+globs: ["**/*.py"]
+alwaysApply: true
+---
+
 # Agno Framework Development Rules
 
 ## Project Context
@@ -730,6 +739,21 @@ repos:
 - Sanitize user inputs
 ```
 
+**Legacy Support:** Alternatively, create `.cursorrules` (root level):
+```
+# Agno Framework Development Rules
+
+See .cursor/rules/*.mdc for modern, scoped rules.
+
+## Core Guidelines
+- Python 3.12+ with type hints
+- Agno framework patterns (Agent, Team, Workflow)
+- Use environment variables for secrets
+- Follow PEP 8 with 100 char lines
+```
+
+**Note:** Use either `.cursor/rules/*.mdc` (modern) OR `.cursorrules` (legacy), not both.
+
 #### Cursor Composer Settings
 ```json
 {
@@ -744,33 +768,44 @@ repos:
 
 ```
 my-agno-project/
-├── .env                    # Environment variables
-├── .cursorrules           # Cursor AI rules
-├── .venv/                 # Virtual environment
+├── .env                          # Environment variables
+├── .gitignore                    # Git ignore patterns
+├── llms.txt                      # Documentation index for @Docs
+├── agno-project.code-workspace   # Cursor workspace file
+├── .venv/                        # Virtual environment
+├── .cursor/
+│   └── rules/                    # Cursor IDE rules (modern)
+│       ├── agno-framework.mdc    # Core framework rules
+│       ├── testing.mdc           # Testing guidelines
+│       └── tools.mdc             # Tool development rules
 ├── .vscode/
-│   └── settings.json      # Cursor/VSCode settings
+│   └── settings.json             # IDE settings
+├── docs/                         # Project documentation
+│   ├── AGNO_ARCHITECTURE.md
+│   ├── AGNO_FEATURES_AND_CONFIGURATION.md
+│   └── AGNO_RESERVED_TERMS.md
 ├── agents/
 │   ├── __init__.py
-│   ├── researcher.py      # Research agent
-│   ├── writer.py          # Writer agent
-│   └── analyzer.py        # Analyzer agent
+│   ├── researcher.py             # Research agent
+│   ├── writer.py                 # Writer agent
+│   └── analyzer.py               # Analyzer agent
 ├── teams/
 │   ├── __init__.py
-│   └── content_team.py    # Team configuration
+│   └── content_team.py           # Team configuration
 ├── workflows/
 │   ├── __init__.py
-│   └── data_pipeline.py   # Workflow definitions
+│   └── data_pipeline.py          # Workflow definitions
 ├── tools/
 │   ├── __init__.py
-│   └── custom_tools.py    # Custom tool implementations
+│   └── custom_tools.py           # Custom tool implementations
 ├── knowledge/
-│   └── documents/         # Knowledge base documents
+│   └── documents/                # Knowledge base documents
 ├── tests/
 │   ├── test_agents.py
 │   ├── test_teams.py
 │   └── test_workflows.py
-├── main.py                # Entry point
-├── requirements.txt       # Dependencies
+├── main.py                       # Entry point
+├── requirements.txt              # Dependencies
 └── README.md
 ```
 

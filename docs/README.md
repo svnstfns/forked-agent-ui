@@ -76,7 +76,10 @@ Topics covered:
 - Cursor IDE configuration
 - Environment variables setup
 - Git configuration
-- Cursor rules and AI features
+- **Cursor workspace files (.code-workspace)**
+- **Modern .cursor/rules/*.mdc files**
+- **llms.txt for @Docs integration**
+- **Using Cursor AI features (Chat, Composer, @Docs)**
 - Extension recommendations
 - Project files and templates
 - Testing configuration
@@ -84,6 +87,32 @@ Topics covered:
 - Troubleshooting common issues
 
 **Best for**: Getting started with Agno development, setting up your IDE, and leveraging Cursor's AI features.
+
+---
+
+## 🖱️ Cursor IDE Integration
+
+This documentation is optimized for **Cursor IDE**, featuring:
+
+### Cursor-Specific Features
+- **`.code-workspace` file**: Multi-root workspace configuration with AI indexing
+- **`.cursor/rules/*.mdc` files**: Modern, scoped development rules
+- **`llms.txt`**: Project documentation index for @Docs integration
+- **AI-aware settings**: Configured for optimal Cursor AI assistance
+
+### Key Cursor Terminology
+- **Workspace**: Your project environment with folders, settings, and AI context
+- **@Docs**: Cursor directive to reference documentation (use with llms.txt)
+- **Rules**: Guidelines in `.cursor/rules/*.mdc` that inform AI suggestions
+- **Indexing**: Cursor's process of understanding your codebase for AI features
+- **Composer**: Multi-file AI editing tool (`Cmd/Ctrl + I`)
+- **Chat**: AI assistant with project context (`Cmd/Ctrl + L`)
+
+### Using This Documentation in Cursor
+1. Open workspace file: `cursor agno-project.code-workspace`
+2. In Cursor Chat, type: `@Docs llms.txt`
+3. Ask questions: `@Docs how do I create an agent with RAG?`
+4. Let rules guide your coding with auto-suggestions
 
 ---
 
